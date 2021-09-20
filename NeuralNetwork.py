@@ -246,7 +246,7 @@ def train(time):
 
 
 def read():
-    path = "D:\\MyWorkPlace\\pattern recognition\\ORL_Faces\\"
+    path = "ORL_Faces\\"
     # 读取样本矩阵和期望输出
     dataset, labelset = loaddataset(path)
     # 对样本矩阵进行pca降维
@@ -256,7 +256,7 @@ def read():
 
 
 if __name__ == '__main__':
-    # read()#自己实现的pca降维函数未作优化，加载时间有点长，已提供已经降维后的数据mydata
+    read()#自己实现的pca降维函数未作优化，加载时间有点长，已提供已经降维后的数据mydata
     start = time.time()
     train(200)  # 训练神经网络经过多次实验，100次已经有足够的效果
     end = time.time()
