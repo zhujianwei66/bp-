@@ -20,56 +20,6 @@ def RateAdaptive(eta, k, c):
         return 0.98 * eta
     return eta
 
-
-def change(m):
-    """把一个数据矩阵变成一行"""
-    M = []
-    for i in range(m.shape[1]):
-        temp = m[:][i]
-        M = M + list(temp)
-    return M
-
-
-def loaddataset(path):
-    """读取数据集"""
-
-    label = np.zeros((400, 40))  # 标签
-    train = []  # 样本矩阵
-    flag = 0
-    for i in range(1, 41):
-        for j in range(1, 11):
-            img = cv.imread(path + f"s{i}\\{j}.pgm", 0)
-            train.append(change(img))
-            label[flag, i - 1] = 1
-            flag = flag + 1
-    # 二维数组转np数组
-    X = np.array(train)
-    return X, label
-
-
-def mypca(data, n):
-    """data:需要降维的矩阵
-    n取对应特征值最大的特征向量个数
-    """
-    # 计算原始数据中每一列的均值，axis=0按列取均值
-    mean = np.mean(data, axis=0)
-    # 数据中心化，使每个feature的均值为0
-    zeroCentred_data = data - mean
-    # 计算协方差矩阵，rowvar=False表示数据的每一列代表一个feature
-    covMat = np.cov(zeroCentred_data, rowvar=False)
-    # 计算协方差矩阵的特征值和特征向量
-    featValue, featVec = np.linalg.eig(covMat)
-    # 将特征值按从小到大排序，index是对应原featValue中的下标
-    index = np.argsort(featValue)
-    # 取最大的n个特征值在原featValue中的下标
-    n_index = index[-n:]
-    # 取最大的两维特征值对应的特征向量组成映射矩阵
-    n_featVec = featVec[:, n_index]
-    # 降维后的数据
-    low_dim_data = np.dot(zeroCentred_data, n_featVec)
-    return low_dim_data
-
-
 # x为输入层神经元个数，y为隐层神经元个数，z输出层神经元个数
 def parameter_initialization(x, y, z):
     # 隐层阈值
@@ -198,7 +148,7 @@ def test():
     testlabel = np.array(testlabel)
 
     # 读取网络
-    net = np.load("net3.npz")
+    net = np.load("net.npz")
     # 权值、偏置值、学习速率
     weight1 = net['weight1']
     weight2 = net['weight2']
@@ -228,7 +178,7 @@ def train(time):
     weight1_change_last = np.zeros(np.shape(weight1)).astype(np.float64)
     weight2_change_last = np.zeros(np.shape(weight2)).astype(np.float64)
     eta = 0.5
-    np.savez("net3.npz", weight1=weight1, weight2=weight2, value1=value1, value2=value2, eta=eta,
+    np.savez("net.npz", weight1=weight1, weight2=weight2, value1=value1, value2=value2, eta=eta,
              weight1_change_last=weight1_change_last, weight2_change_last=weight2_change_last, rate=0)
     rate_last = 0
     # 训练次数time
@@ -242,21 +192,11 @@ def train(time):
                                                                                                     weight2_change_last)
         print(f"\r迭代次数:{i + 1}", end=" ")
     # 保存数据
-    np.savez("net3.npz", weight1=weight1, weight2=weight2, value1=value1, value2=value2)  # 保存数据
+    np.savez("net.npz", weight1=weight1, weight2=weight2, value1=value1, value2=value2)  # 保存数据
 
-
-def read():
-    path = "ORL_Faces\\"
-    # 读取样本矩阵和期望输出
-    dataset, labelset = loaddataset(path)
-    # 对样本矩阵进行pca降维
-    dataset_pca = mypca(dataset, 71).astype(np.float64)
-    # 保存降维后矩阵
-    np.savez("mydata.npz", dataset_pca=dataset_pca, labelset=labelset)
 
 
 if __name__ == '__main__':
-    read()#自己实现的pca降维函数未作优化，加载时间有点长，已提供已经降维后的数据mydata
     start = time.time()
     train(200)  # 训练神经网络经过多次实验，100次已经有足够的效果
     end = time.time()
